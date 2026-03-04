@@ -9,9 +9,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// Controller xử lý API danh mục
+// Controller xử lý API danh mục (chỉ Admin)
 @RestController
 @RequestMapping("/api/categories")
+@PreAuthorize("hasRole('Admin')")
 public class CategoryController {
 
     private final ICategoryService categoryService;
@@ -20,9 +21,8 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // GET /api/categories — Lấy danh sách danh mục (chỉ Admin)
+    // GET /api/categories — Lấy danh sách danh mục
     @GetMapping
-    @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<ApiResponse<List<CategoryListProjection>>> getAllCategories() {
         var response = categoryService.getAllCategories();
         return ResponseEntity.ok(response);
