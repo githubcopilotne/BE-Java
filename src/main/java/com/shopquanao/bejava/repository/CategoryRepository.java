@@ -13,4 +13,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     // Interface Projection — Spring tự sinh SQL chỉ lấy 4 field
     List<CategoryListProjection> findAllBy();
+
+    // Kiểm tra tên danh mục đã tồn tại chưa (SQL Server mặc định case-insensitive)
+    boolean existsByCategoryName(String categoryName);
 }
