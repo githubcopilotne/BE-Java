@@ -26,6 +26,9 @@ public class Category {
     @Column(name = "description", length = 500)
     private String description;
 
+    @Column(name = "status", nullable = false)
+    private Integer status;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

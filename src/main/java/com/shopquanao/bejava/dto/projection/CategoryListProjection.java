@@ -11,5 +11,7 @@ public interface CategoryListProjection {
 
     String getDescription();
 
+    Integer getStatus();
+
     LocalDateTime getCreatedAt();
 }
