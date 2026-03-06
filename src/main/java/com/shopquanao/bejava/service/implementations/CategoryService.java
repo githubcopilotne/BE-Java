@@ -3,6 +3,7 @@ package com.shopquanao.bejava.service.implementations;
 import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.CategoryListProjection;
 import com.shopquanao.bejava.dto.request.CreateCategoryRequest;
+import com.shopquanao.bejava.dto.request.UpdateCategoryRequest;
 import com.shopquanao.bejava.entity.Category;
 import com.shopquanao.bejava.repository.CategoryRepository;
 import com.shopquanao.bejava.service.interfaces.ICategoryService;
@@ -56,5 +57,41 @@ public class CategoryService implements ICategoryService {
         Category saved = categoryRepository.save(category);
 
         return ApiResponse.success(saved, "Tạo danh mục thành công");
+    }
+
+    // Cập nhật danh mục
+    @Override
+    public ApiResponse<Category> updateCategory(Integer id, UpdateCategoryRequest request) {
+        // 1. Tìm category theo id
+        var optional = categoryRepository.findById(id);
+        if (optional.isEmpty()) {
+            return ApiResponse.error("Danh mục không tồn tại");
+        }
+        Category category = optional.get();
+
+        // 2. Trim input
+        String categoryName = request.getCategoryName().trim();
+        String description = request.getDescription() != null ? request.getDescription().trim() : null;
+
+        // 3. Kiểm tra trùng tên (loại trừ chính nó)
+        if (categoryRepository.existsByCategoryNameAndCategoryIdNot(categoryName, id)) {
+            return ApiResponse.error("Tên danh mục đã tồn tại");
+        }
+
+        // 4. Validate status (chỉ chấp nhận 0 hoặc 1)
+        if (request.getStatus() != 0 && request.getStatus() != 1) {
+            return ApiResponse.error("Trạng thái không hợp lệ");
+        }
+
+        // 5. Cập nhật giá trị
+        category.setCategoryName(categoryName);
+        category.setSlug(SlugUtils.toSlug(categoryName)); // Sinh lại slug nếu đổi tên
+        category.setDescription(description);
+        category.setStatus(request.getStatus());
+
+        // 6. Lưu vào DB (updatedAt tự set bởi @PreUpdate)
+        Category saved = categoryRepository.save(category);
+
+        return ApiResponse.success(saved, "Cập nhật danh mục thành công");
     }
 }

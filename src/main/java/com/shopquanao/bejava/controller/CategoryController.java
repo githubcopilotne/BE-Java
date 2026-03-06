@@ -3,6 +3,7 @@ package com.shopquanao.bejava.controller;
 import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.CategoryListProjection;
 import com.shopquanao.bejava.dto.request.CreateCategoryRequest;
+import com.shopquanao.bejava.dto.request.UpdateCategoryRequest;
 import com.shopquanao.bejava.entity.Category;
 import com.shopquanao.bejava.service.interfaces.ICategoryService;
 import jakarta.validation.Valid;
@@ -36,6 +37,20 @@ public class CategoryController {
     public ResponseEntity<ApiResponse<Category>> createCategory(
             @Valid @RequestBody CreateCategoryRequest request) {
         var response = categoryService.createCategory(request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PUT /api/categories/{id} — Cập nhật danh mục
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Category>> updateCategory(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateCategoryRequest request) {
+        var response = categoryService.updateCategory(id, request);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

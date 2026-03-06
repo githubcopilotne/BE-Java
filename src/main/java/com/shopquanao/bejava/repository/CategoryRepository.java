@@ -16,4 +16,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     // Kiểm tra tên danh mục đã tồn tại chưa (SQL Server mặc định case-insensitive)
     boolean existsByCategoryName(String categoryName);
+
+    // Kiểm tra trùng tên khi update — loại trừ chính category đang sửa
+    boolean existsByCategoryNameAndCategoryIdNot(String categoryName, Integer categoryId);
 }
