@@ -25,7 +25,7 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    // GET /api/categories — Lấy danh sách danh mục
+    // GET /api/categories — Lấy danh sách danh mục nè
     @GetMapping
     public ResponseEntity<ApiResponse<List<CategoryListProjection>>> getAllCategories() {
         var response = categoryService.getAllCategories();
