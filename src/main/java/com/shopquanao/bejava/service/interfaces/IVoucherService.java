@@ -12,4 +12,7 @@ public interface IVoucherService {
     ApiResponse<List<VoucherListProjection>> getAllVouchers();
 
     ApiResponse<Voucher> createVoucher(CreateVoucherRequest request);
+
+    ApiResponse<Voucher> getVoucherById(Integer id);
+
 }

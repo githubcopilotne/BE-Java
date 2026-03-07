@@ -86,4 +86,13 @@ public class VoucherService implements IVoucherService {
         Voucher saved = voucherRepository.save(voucher);
         return ApiResponse.success(saved, "Tạo voucher thành công");
     }
+
+    @Override
+    public ApiResponse<Voucher> getVoucherById(Integer id) {
+        var voucher = voucherRepository.findById(id);
+        if (voucher.isEmpty()) {
+            return ApiResponse.error("Voucher không tồn tại");
+        }
+        return ApiResponse.success(voucher.get(), "Lấy voucher chi tiết thành công");
+    }
 }

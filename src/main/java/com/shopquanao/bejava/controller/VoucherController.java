@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -41,6 +42,14 @@ public class VoucherController {
             return ResponseEntity.ok(response);
         }
 
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Voucher>> getVoucherById(@PathVariable Integer id) {
+        var response = voucherService.getVoucherById(id);
+        if (response.isSuccess())
+            return ResponseEntity.ok(response);
         return ResponseEntity.badRequest().body(response);
     }
 }
