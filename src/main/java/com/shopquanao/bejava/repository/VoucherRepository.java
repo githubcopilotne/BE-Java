@@ -11,4 +11,6 @@ import java.util.List;
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
 
     List<VoucherListProjection> findAllBy();
+
+    boolean existsByVoucherCode(String voucherCode);
 }
