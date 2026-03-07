@@ -13,4 +13,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
     List<VoucherListProjection> findAllBy();
 
     boolean existsByVoucherCode(String voucherCode);
+
+    boolean existsByVoucherCodeAndVoucherIdNot(String voucherCode, Integer voucherId);
 }

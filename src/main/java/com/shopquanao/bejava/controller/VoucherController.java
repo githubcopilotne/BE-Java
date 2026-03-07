@@ -3,6 +3,7 @@ package com.shopquanao.bejava.controller;
 import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.VoucherListProjection;
 import com.shopquanao.bejava.dto.request.CreateVoucherRequest;
+import com.shopquanao.bejava.dto.request.UpdateVoucherRequest;
 import com.shopquanao.bejava.entity.Voucher;
 import com.shopquanao.bejava.service.interfaces.IVoucherService;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,6 +52,17 @@ public class VoucherController {
         var response = voucherService.getVoucherById(id);
         if (response.isSuccess())
             return ResponseEntity.ok(response);
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Voucher>> updateVoucher(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateVoucherRequest request) {
+        var response = voucherService.updateVoucher(id, request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
         return ResponseEntity.badRequest().body(response);
     }
 }
