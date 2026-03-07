@@ -15,4 +15,6 @@ public interface ICategoryService {
     ApiResponse<Category> createCategory(CreateCategoryRequest request);
 
     ApiResponse<Category> updateCategory(Integer id, UpdateCategoryRequest request);
+
+    ApiResponse<Category> getCategoryById(Integer id);
 }

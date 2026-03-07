@@ -58,4 +58,16 @@ public class CategoryController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // GET /api/categories/{id} — Lấy chi tiết danh mục
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Category>> getCategoryById(@PathVariable Integer id) {
+        var response = categoryService.getCategoryById(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

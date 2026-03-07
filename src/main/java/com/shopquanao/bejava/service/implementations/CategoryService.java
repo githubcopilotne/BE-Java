@@ -94,4 +94,15 @@ public class CategoryService implements ICategoryService {
 
         return ApiResponse.success(saved, "Cập nhật danh mục thành công");
     }
+
+    // Lấy chi tiết danh mục theo id
+    @Override
+    public ApiResponse<Category> getCategoryById(Integer id) {
+        var optional = categoryRepository.findById(id);
+        if (optional.isEmpty()) {
+            return ApiResponse.error("Danh mục không tồn tại");
+        }
+
+        return ApiResponse.success(optional.get(), "Lấy danh mục thành công");
+    }
 }
