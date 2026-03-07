@@ -14,4 +14,5 @@ public interface CategoryListProjection {
     Integer getStatus();
 
     LocalDateTime getCreatedAt();
+    // ok
 }
