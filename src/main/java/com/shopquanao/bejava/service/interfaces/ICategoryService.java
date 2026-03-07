@@ -17,4 +17,6 @@ public interface ICategoryService {
     ApiResponse<Category> updateCategory(Integer id, UpdateCategoryRequest request);
 
     ApiResponse<Category> getCategoryById(Integer id);
+
+    ApiResponse<Void> deleteCategory(Integer id);
 }

@@ -70,4 +70,16 @@ public class CategoryController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // DELETE /api/categories/{id} — Xoá danh mục
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Integer id) {
+        var response = categoryService.deleteCategory(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

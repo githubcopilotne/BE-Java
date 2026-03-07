@@ -6,6 +6,7 @@ import com.shopquanao.bejava.dto.request.CreateCategoryRequest;
 import com.shopquanao.bejava.dto.request.UpdateCategoryRequest;
 import com.shopquanao.bejava.entity.Category;
 import com.shopquanao.bejava.repository.CategoryRepository;
+import com.shopquanao.bejava.repository.ProductRepository;
 import com.shopquanao.bejava.service.interfaces.ICategoryService;
 import com.shopquanao.bejava.util.SlugUtils;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,11 @@ import java.util.List;
 public class CategoryService implements ICategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     // Lấy tất cả danh mục cho admin list
@@ -104,5 +107,24 @@ public class CategoryService implements ICategoryService {
         }
 
         return ApiResponse.success(optional.get(), "Lấy danh mục thành công");
+    }
+
+    // Xoá danh mục
+    @Override
+    public ApiResponse<Void> deleteCategory(Integer id) {
+        // 1. Kiểm tra danh mục tồn tại
+        if (!categoryRepository.existsById(id)) {
+            return ApiResponse.error("Danh mục không tồn tại");
+        }
+
+        // 2. Kiểm tra có sản phẩm thuộc danh mục này không
+        if (productRepository.existsByCategoryId(id)) {
+            return ApiResponse.error("Không thể xoá danh mục đang có sản phẩm");
+        }
+
+        // 3. Xoá khỏi DB
+        categoryRepository.deleteById(id);
+
+        return ApiResponse.success(null, "Xoá danh mục thành công");
     }
 }
