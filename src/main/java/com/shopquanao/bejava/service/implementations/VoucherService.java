@@ -178,4 +178,21 @@ public class VoucherService implements IVoucherService {
         Voucher saved = voucherRepository.save(voucher);
         return ApiResponse.success(saved, "Cập nhật voucher thành công");
     }
+
+    @Override
+    public ApiResponse<Voucher> deleteVoucher(Integer id) {
+        var optional = voucherRepository.findById(id);
+        if (optional.isEmpty()) {
+            return ApiResponse.error("Voucher không tồn tại");
+        }
+
+        Voucher voucher = optional.get();
+        int usedCount = voucher.getUsedCount() == null ? 0 : voucher.getUsedCount();
+        if (usedCount > 0) {
+            return ApiResponse.error("Voucher đã có lượt sử dụng, không được xóa");
+        }
+
+        voucherRepository.delete(voucher);
+        return ApiResponse.success(voucher, "Xóa voucher thành công");
+    }
 }

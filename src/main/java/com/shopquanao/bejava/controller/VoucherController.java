@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,6 +61,15 @@ public class VoucherController {
             @PathVariable Integer id,
             @Valid @RequestBody UpdateVoucherRequest request) {
         var response = voucherService.updateVoucher(id, request);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Voucher>> deleteVoucher(@PathVariable Integer id) {
+        var response = voucherService.deleteVoucher(id);
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         }

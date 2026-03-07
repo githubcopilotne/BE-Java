@@ -18,4 +18,6 @@ public interface IVoucherService {
 
     ApiResponse<Voucher> updateVoucher(Integer id, UpdateVoucherRequest request);
 
+    ApiResponse<Voucher> deleteVoucher(Integer id);
+
 }
