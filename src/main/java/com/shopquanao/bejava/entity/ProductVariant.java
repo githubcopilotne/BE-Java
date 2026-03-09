@@ -1,5 +1,6 @@
 package com.shopquanao.bejava.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,4 +28,10 @@ public class ProductVariant {
 
     @Column(name = "stock_quantity", nullable = false)
     private Integer stockQuantity = 0;
+
+    // Relationship: Variant thuộc 1 Product
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Product product;
 }

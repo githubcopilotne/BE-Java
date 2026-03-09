@@ -1,10 +1,12 @@
 package com.shopquanao.bejava.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 // Entity ánh xạ với bảng "Products" trong database
 @Entity
@@ -41,6 +43,23 @@ public class Product {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // Relationship: Product thuộc 1 Category (tương đương virtual Category bên C#)
+    // insertable/updatable = false vì đã có field categoryId quản lý cột này
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    @JsonIgnore
+    private Category category;
+
+    // Relationship: Product có nhiều Variants
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ProductVariant> variants;
+
+    // Relationship: Product có nhiều Images
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<ProductImage> images;
 
     @PrePersist
     protected void onCreate() {
