@@ -32,4 +32,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             JOIN Categories c ON p.category_id = c.category_id
             """, countQuery = "SELECT COUNT(*) FROM Products", nativeQuery = true)
     Page<ProductListProjection> findAllProducts(Pageable pageable);
+
+    // Kiểm tra tên sản phẩm đã tồn tại chưa (SQL Server mặc định case-insensitive)
+    boolean existsByProductName(String productName);
 }
