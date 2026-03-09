@@ -5,9 +5,11 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.entity.Product;
+import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface IProductService {
     ApiResponse<Product> createProduct(CreateProductRequest request);
 
     ApiResponse<List<ProductVariant>> addVariants(Integer productId, List<CreateVariantRequest> requests);
+
+    ApiResponse<List<ProductImage>> addImages(Integer productId, List<MultipartFile> files, Integer mainIndex);
 }

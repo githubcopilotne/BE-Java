@@ -5,6 +5,7 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.entity.Product;
+import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
 import com.shopquanao.bejava.service.interfaces.IProductService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -54,6 +56,21 @@ public class ProductController {
             @PathVariable Integer id,
             @Valid @RequestBody List<CreateVariantRequest> requests) {
         var response = productService.addVariants(id, requests);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // POST /api/products/{id}/images — Upload ảnh cho sản phẩm
+    @PostMapping("/{id}/images")
+    public ResponseEntity<ApiResponse<List<ProductImage>>> addImages(
+            @PathVariable Integer id,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "mainIndex", required = false) Integer mainIndex) {
+        var response = productService.addImages(id, files, mainIndex);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

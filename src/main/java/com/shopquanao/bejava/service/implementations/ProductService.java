@@ -5,16 +5,21 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.entity.Product;
+import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
 import com.shopquanao.bejava.repository.CategoryRepository;
+import com.shopquanao.bejava.repository.ProductImageRepository;
 import com.shopquanao.bejava.repository.ProductRepository;
 import com.shopquanao.bejava.repository.ProductVariantRepository;
+import com.shopquanao.bejava.service.interfaces.ICloudinaryService;
 import com.shopquanao.bejava.service.interfaces.IProductService;
 import com.shopquanao.bejava.util.SlugUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +29,19 @@ public class ProductService implements IProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final ProductImageRepository productImageRepository;
+    private final ICloudinaryService cloudinaryService;
 
     public ProductService(ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            ProductVariantRepository productVariantRepository) {
+            ProductVariantRepository productVariantRepository,
+            ProductImageRepository productImageRepository,
+            ICloudinaryService cloudinaryService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productVariantRepository = productVariantRepository;
+        this.productImageRepository = productImageRepository;
+        this.cloudinaryService = cloudinaryService;
     }
 
     // Lấy danh sách sản phẩm có phân trang
@@ -120,5 +131,58 @@ public class ProductService implements IProductService {
         List<ProductVariant> saved = productVariantRepository.saveAll(variants);
 
         return ApiResponse.success(saved, "Thêm biến thể thành công");
+    }
+
+    // Thêm hình ảnh cho sản phẩm
+    @Override
+    public ApiResponse<List<ProductImage>> addImages(Integer productId, List<MultipartFile> files, Integer mainIndex) {
+        // 1. Kiểm tra product tồn tại
+        if (!productRepository.existsById(productId)) {
+            return ApiResponse.error("Sản phẩm không tồn tại");
+        }
+
+        // 2. Kiểm tra có file ảnh không
+        if (files == null || files.isEmpty()) {
+            return ApiResponse.error("Vui lòng chọn ít nhất 1 ảnh");
+        }
+
+        // 2.1. Kiểm tra file không rỗng (Postman có thể gửi key nhưng không chọn file
+        // thực tế)
+        for (MultipartFile file : files) {
+            if (file.isEmpty()) {
+                return ApiResponse.error("File ảnh không được rỗng");
+            }
+        }
+
+        // 3. Validate mainIndex — admin phải chọn ảnh main
+        if (mainIndex == null) {
+            return ApiResponse.error("Vui lòng chọn ảnh chính");
+        }
+        if (mainIndex < 0 || mainIndex >= files.size()) {
+            return ApiResponse.error("Vị trí ảnh chính không hợp lệ");
+        }
+
+        // 4. Upload từng file lên Cloudinary và lưu vào DB
+        List<ProductImage> images = new ArrayList<>();
+        try {
+            for (int i = 0; i < files.size(); i++) {
+                // Upload lên Cloudinary → nhận URL
+                String imageUrl = cloudinaryService.upload(files.get(i));
+
+                // Tạo entity — ảnh ở vị trí mainIndex thì isMain = true
+                ProductImage image = new ProductImage();
+                image.setProductId(productId);
+                image.setImageUrl(imageUrl);
+                image.setIsMain(i == mainIndex); // Admin chọn ảnh nào là main
+                images.add(image);
+            }
+        } catch (IOException | RuntimeException e) {
+            return ApiResponse.error("Upload ảnh thất bại: " + e.getMessage());
+        }
+
+        // 5. Lưu tất cả images vào DB
+        List<ProductImage> saved = productImageRepository.saveAll(images);
+
+        return ApiResponse.success(saved, "Thêm ảnh sản phẩm thành công");
     }
 }
