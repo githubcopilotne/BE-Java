@@ -1,6 +1,5 @@
 package com.shopquanao.bejava.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,19 +45,16 @@ public class Product {
 
     // Relationship: Product thuộc 1 Category (tương đương virtual Category bên C#)
     // insertable/updatable = false vì đã có field categoryId quản lý cột này
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "category_id", insertable = false, updatable = false)
-    @JsonIgnore
     private Category category;
 
     // Relationship: Product có nhiều Variants
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "product")
     private List<ProductVariant> variants;
 
     // Relationship: Product có nhiều Images
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "product")
     private List<ProductImage> images;
 
     @PrePersist

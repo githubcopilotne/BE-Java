@@ -185,4 +185,17 @@ public class ProductService implements IProductService {
 
         return ApiResponse.success(saved, "Thêm ảnh sản phẩm thành công");
     }
+
+    // Xem chi tiết sản phẩm — trả entity kèm category, variants, images nhờ
+    // relationship
+    @Override
+    public ApiResponse<Product> getProductById(Integer productId) {
+        // Tìm product theo id — relationship tự load category, variants, images
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ApiResponse.error("Sản phẩm không tồn tại");
+        }
+
+        return ApiResponse.success(product, "Lấy chi tiết sản phẩm thành công");
+    }
 }

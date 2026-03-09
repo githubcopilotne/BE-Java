@@ -78,4 +78,16 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // GET /api/products/{id} — Xem chi tiết sản phẩm
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Integer id) {
+        var response = productService.getProductById(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

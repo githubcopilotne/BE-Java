@@ -22,4 +22,6 @@ public interface IProductService {
     ApiResponse<List<ProductVariant>> addVariants(Integer productId, List<CreateVariantRequest> requests);
 
     ApiResponse<List<ProductImage>> addImages(Integer productId, List<MultipartFile> files, Integer mainIndex);
+
+    ApiResponse<Product> getProductById(Integer productId);
 }
