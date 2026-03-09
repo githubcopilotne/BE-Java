@@ -82,6 +82,13 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- 5. Cloudinary — upload ảnh lên cloud -->
+		<dependency>
+			<groupId>com.cloudinary</groupId>
+			<artifactId>cloudinary-http44</artifactId>
+			<version>1.38.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
