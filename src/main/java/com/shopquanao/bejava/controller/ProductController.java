@@ -3,7 +3,9 @@ package com.shopquanao.bejava.controller;
 import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
+import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.entity.Product;
+import com.shopquanao.bejava.entity.ProductVariant;
 import com.shopquanao.bejava.service.interfaces.IProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 // Controller xử lý API sản phẩm (chỉ Admin)
 @RestController
@@ -36,6 +40,20 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Product>> createProduct(
             @Valid @RequestBody CreateProductRequest request) {
         var response = productService.createProduct(request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // POST /api/products/{id}/variants — Thêm biến thể cho sản phẩm
+    @PostMapping("/{id}/variants")
+    public ResponseEntity<ApiResponse<List<ProductVariant>>> addVariants(
+            @PathVariable Integer id,
+            @Valid @RequestBody List<CreateVariantRequest> requests) {
+        var response = productService.addVariants(id, requests);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
