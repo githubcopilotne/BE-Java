@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
     // Kế thừa save, saveAll từ JpaRepository — đủ dùng cho POST images
+
+    // Check product có ảnh chính không
+    boolean existsByProductIdAndIsMainTrue(Integer productId);
 }

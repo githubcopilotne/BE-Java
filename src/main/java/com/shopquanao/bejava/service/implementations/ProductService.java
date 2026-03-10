@@ -7,6 +7,7 @@ import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.dto.request.UpdateProductRequest;
 import com.shopquanao.bejava.dto.request.UpdateVariantStockRequest;
 import com.shopquanao.bejava.dto.response.UpdateProductResponse;
+import com.shopquanao.bejava.entity.Category;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
@@ -323,5 +324,43 @@ public class ProductService implements IProductService {
         productVariantRepository.deleteById(variantId);
 
         return ApiResponse.success(null, "Xoá biến thể thành công");
+    }
+
+    // Toggle trạng thái ẩn/hiện sản phẩm
+    @Override
+    public ApiResponse<Map<String, Integer>> toggleProductStatus(Integer productId) {
+        // 1. Tìm product
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ApiResponse.error("Sản phẩm không tồn tại");
+        }
+
+        // 2. Nếu đang ẩn (0) → muốn bật hiện (1) → check điều kiện
+        if (product.getStatus() == 0) {
+            // Check category đang hiện
+            Category category = categoryRepository.findById(product.getCategoryId()).orElse(null);
+            if (category == null || category.getStatus() != 1) {
+                return ApiResponse.error("Danh mục đang ẩn, không thể đăng bán");
+            }
+
+            // Check có ít nhất 1 variant
+            if (!productVariantRepository.existsByProductId(productId)) {
+                return ApiResponse.error("Cần ít nhất 1 biến thể để đăng bán");
+            }
+
+            // Check có ảnh chính
+            if (!productImageRepository.existsByProductIdAndIsMainTrue(productId)) {
+                return ApiResponse.error("Cần có ảnh chính để đăng bán");
+            }
+
+            product.setStatus(1);
+        } else {
+            // 3. Đang hiện (1) → tắt luôn, không cần check
+            product.setStatus(0);
+        }
+
+        productRepository.save(product);
+
+        return ApiResponse.success(Map.of("status", product.getStatus()), "Cập nhật trạng thái thành công");
     }
 }

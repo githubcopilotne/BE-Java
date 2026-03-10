@@ -35,4 +35,6 @@ public interface IProductService {
             UpdateVariantStockRequest request);
 
     ApiResponse<Void> deleteVariant(Integer productId, Integer variantId);
+
+    ApiResponse<Map<String, Integer>> toggleProductStatus(Integer productId);
 }

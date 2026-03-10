@@ -138,4 +138,17 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // PATCH /api/products/{id}/status — Toggle ẩn/hiện sản phẩm
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> toggleProductStatus(
+            @PathVariable Integer id) {
+        var response = productService.toggleProductStatus(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }
