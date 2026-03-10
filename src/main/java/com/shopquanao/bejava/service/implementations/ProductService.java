@@ -4,6 +4,8 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
+import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
@@ -197,5 +199,46 @@ public class ProductService implements IProductService {
         }
 
         return ApiResponse.success(product, "Lấy chi tiết sản phẩm thành công");
+    }
+
+    // Cập nhật thông tin chung sản phẩm
+    @Override
+    public ApiResponse<UpdateProductResponse> updateProduct(Integer productId, UpdateProductRequest request) {
+        // 1. Tìm sản phẩm theo id
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ApiResponse.error("Sản phẩm không tồn tại");
+        }
+
+        // 2. Trim input
+        String productName = request.getProductName().trim();
+        String description = request.getDescription() != null ? request.getDescription().trim() : null;
+
+        // 3. Kiểm tra danh mục tồn tại
+        if (!categoryRepository.existsById(request.getCategoryId())) {
+            return ApiResponse.error("Danh mục không tồn tại");
+        }
+
+        // 4. Kiểm tra trùng tên — loại trừ chính sản phẩm đang sửa
+        if (productRepository.existsByProductNameAndProductIdNot(productName, productId)) {
+            return ApiResponse.error("Tên sản phẩm đã tồn tại");
+        }
+
+        // 5. Cập nhật các field
+        product.setProductName(productName);
+        product.setCategoryId(request.getCategoryId());
+        product.setUnitPrice(request.getUnitPrice());
+        product.setDescription(description);
+        product.setSlug(SlugUtils.toSlug(productName)); // Cập nhật slug theo tên mới
+
+        // 6. Lưu vào DB (updatedAt tự set bởi @PreUpdate)
+        Product saved = productRepository.save(product);
+
+        // 7. Map sang DTO — chỉ trả field mà FE chưa có
+        UpdateProductResponse dto = new UpdateProductResponse();
+        dto.setSlug(saved.getSlug());
+        dto.setUpdatedAt(saved.getUpdatedAt());
+
+        return ApiResponse.success(dto, "Cập nhật sản phẩm thành công");
     }
 }

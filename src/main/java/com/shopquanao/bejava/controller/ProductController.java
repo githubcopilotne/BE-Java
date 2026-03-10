@@ -4,6 +4,8 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
+import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
@@ -83,6 +85,20 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Integer id) {
         var response = productService.getProductById(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PUT /api/products/{id} — Cập nhật thông tin chung sản phẩm
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UpdateProductResponse>> updateProduct(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateProductRequest request) {
+        var response = productService.updateProduct(id, request);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

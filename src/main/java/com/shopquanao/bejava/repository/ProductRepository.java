@@ -35,4 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     // Kiểm tra tên sản phẩm đã tồn tại chưa (SQL Server mặc định case-insensitive)
     boolean existsByProductName(String productName);
+
+    // Kiểm tra tên sản phẩm đã tồn tại chưa — loại trừ chính sản phẩm đang sửa
+    boolean existsByProductNameAndProductIdNot(String productName, Integer productId);
 }

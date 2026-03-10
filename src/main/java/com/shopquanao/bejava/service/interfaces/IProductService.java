@@ -4,6 +4,8 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
+import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
@@ -24,4 +26,6 @@ public interface IProductService {
     ApiResponse<List<ProductImage>> addImages(Integer productId, List<MultipartFile> files, Integer mainIndex);
 
     ApiResponse<Product> getProductById(Integer productId);
+
+    ApiResponse<UpdateProductResponse> updateProduct(Integer productId, UpdateProductRequest request);
 }
