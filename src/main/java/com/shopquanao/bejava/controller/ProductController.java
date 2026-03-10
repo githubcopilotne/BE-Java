@@ -124,4 +124,18 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // DELETE /api/products/{productId}/variants/{variantId} — Xoá biến thể
+    @DeleteMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<ApiResponse<Void>> deleteVariant(
+            @PathVariable Integer productId,
+            @PathVariable Integer variantId) {
+        var response = productService.deleteVariant(productId, variantId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

@@ -11,6 +11,8 @@ import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
 import com.shopquanao.bejava.repository.CategoryRepository;
+import com.shopquanao.bejava.repository.CartItemRepository;
+import com.shopquanao.bejava.repository.OrderItemRepository;
 import com.shopquanao.bejava.repository.ProductImageRepository;
 import com.shopquanao.bejava.repository.ProductRepository;
 import com.shopquanao.bejava.repository.ProductVariantRepository;
@@ -35,17 +37,23 @@ public class ProductService implements IProductService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductImageRepository productImageRepository;
     private final ICloudinaryService cloudinaryService;
+    private final CartItemRepository cartItemRepository;
+    private final OrderItemRepository orderItemRepository;
 
     public ProductService(ProductRepository productRepository,
             CategoryRepository categoryRepository,
             ProductVariantRepository productVariantRepository,
             ProductImageRepository productImageRepository,
-            ICloudinaryService cloudinaryService) {
+            ICloudinaryService cloudinaryService,
+            CartItemRepository cartItemRepository,
+            OrderItemRepository orderItemRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productVariantRepository = productVariantRepository;
         this.productImageRepository = productImageRepository;
         this.cloudinaryService = cloudinaryService;
+        this.cartItemRepository = cartItemRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     // Lấy danh sách sản phẩm có phân trang
@@ -285,5 +293,35 @@ public class ProductService implements IProductService {
 
         // 5. Trả stockQuantity mới cho FE cập nhật
         return ApiResponse.success(Map.of("stockQuantity", newStock), "Cập nhật số lượng thành công");
+    }
+
+    // Xoá biến thể (hard delete, check FK trước)
+    @Override
+    public ApiResponse<Void> deleteVariant(Integer productId, Integer variantId) {
+        // 1. Tìm variant theo id
+        ProductVariant variant = productVariantRepository.findById(variantId).orElse(null);
+        if (variant == null) {
+            return ApiResponse.error("Biến thể không tồn tại");
+        }
+
+        // 2. Kiểm tra variant thuộc đúng product
+        if (!variant.getProductId().equals(productId)) {
+            return ApiResponse.error("Biến thể không thuộc sản phẩm này");
+        }
+
+        // 3. Check đã có đơn hàng → không cho xoá
+        if (orderItemRepository.existsByVariantId(variantId)) {
+            return ApiResponse.error("Không thể xoá biến thể đã có đơn hàng");
+        }
+
+        // 4. Xoá cart_items tham chiếu tới variant (nếu có)
+        if (cartItemRepository.existsByVariantId(variantId)) {
+            cartItemRepository.deleteByVariantId(variantId);
+        }
+
+        // 5. Hard delete variant
+        productVariantRepository.deleteById(variantId);
+
+        return ApiResponse.success(null, "Xoá biến thể thành công");
     }
 }
