@@ -5,6 +5,7 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.request.UpdateVariantStockRequest;
 import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 // Controller xử lý API sản phẩm (chỉ Admin)
 @RestController
@@ -99,6 +101,22 @@ public class ProductController {
             @PathVariable Integer id,
             @Valid @RequestBody UpdateProductRequest request) {
         var response = productService.updateProduct(id, request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PATCH /api/products/{productId}/variants/{variantId}/stock — Cộng dồn số
+    // lượng tồn kho
+    @PatchMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> updateVariantStock(
+            @PathVariable Integer productId,
+            @PathVariable Integer variantId,
+            @Valid @RequestBody UpdateVariantStockRequest request) {
+        var response = productService.updateVariantStock(productId, variantId, request);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

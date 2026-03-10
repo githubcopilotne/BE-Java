@@ -5,6 +5,7 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.request.UpdateVariantStockRequest;
 import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ProductService implements IProductService {
@@ -240,5 +242,31 @@ public class ProductService implements IProductService {
         dto.setUpdatedAt(saved.getUpdatedAt());
 
         return ApiResponse.success(dto, "Cập nhật sản phẩm thành công");
+    }
+
+    // Cộng dồn số lượng tồn kho cho biến thể
+    @Override
+    public ApiResponse<Map<String, Integer>> updateVariantStock(Integer productId, Integer variantId,
+            UpdateVariantStockRequest request) {
+        // 1. Tìm variant theo id
+        ProductVariant variant = productVariantRepository.findById(variantId).orElse(null);
+        if (variant == null) {
+            return ApiResponse.error("Biến thể không tồn tại");
+        }
+
+        // 2. Kiểm tra variant thuộc đúng product
+        if (!variant.getProductId().equals(productId)) {
+            return ApiResponse.error("Biến thể không thuộc sản phẩm này");
+        }
+
+        // 3. Cộng dồn: stock mới = stock cũ + số lượng nhập thêm
+        int newStock = variant.getStockQuantity() + request.getQuantity();
+        variant.setStockQuantity(newStock);
+
+        // 4. Lưu vào DB
+        productVariantRepository.save(variant);
+
+        // 5. Trả stockQuantity mới cho FE cập nhật
+        return ApiResponse.success(Map.of("stockQuantity", newStock), "Cập nhật số lượng thành công");
     }
 }

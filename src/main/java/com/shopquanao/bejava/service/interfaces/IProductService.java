@@ -5,6 +5,7 @@ import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
 import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.request.UpdateVariantStockRequest;
 import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IProductService {
 
@@ -28,4 +30,7 @@ public interface IProductService {
     ApiResponse<Product> getProductById(Integer productId);
 
     ApiResponse<UpdateProductResponse> updateProduct(Integer productId, UpdateProductRequest request);
+
+    ApiResponse<Map<String, Integer>> updateVariantStock(Integer productId, Integer variantId,
+            UpdateVariantStockRequest request);
 }
