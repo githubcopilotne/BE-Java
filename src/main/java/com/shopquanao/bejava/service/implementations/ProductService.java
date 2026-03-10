@@ -167,12 +167,17 @@ public class ProductService implements IProductService {
             }
         }
 
-        // 3. Validate mainIndex — admin phải chọn ảnh main
-        if (mainIndex == null) {
-            return ApiResponse.error("Vui lòng chọn ảnh chính");
-        }
-        if (mainIndex < 0 || mainIndex >= files.size()) {
-            return ApiResponse.error("Vị trí ảnh chính không hợp lệ");
+        // 3. Kiểm tra product đã có ảnh chính chưa
+        boolean hasMainImage = productImageRepository.existsByProductIdAndIsMainTrue(productId);
+
+        // Nếu chưa có ảnh chính → bắt buộc chọn mainIndex
+        if (!hasMainImage) {
+            if (mainIndex == null) {
+                return ApiResponse.error("Vui lòng chọn ảnh chính");
+            }
+            if (mainIndex < 0 || mainIndex >= files.size()) {
+                return ApiResponse.error("Vị trí ảnh chính không hợp lệ");
+            }
         }
 
         // 4. Upload từng file lên Cloudinary và lưu vào DB
@@ -182,11 +187,14 @@ public class ProductService implements IProductService {
                 // Upload lên Cloudinary → nhận URL
                 String imageUrl = cloudinaryService.upload(files.get(i));
 
-                // Tạo entity — ảnh ở vị trí mainIndex thì isMain = true
+                // Tạo entity
                 ProductImage image = new ProductImage();
                 image.setProductId(productId);
                 image.setImageUrl(imageUrl);
-                image.setIsMain(i == mainIndex); // Admin chọn ảnh nào là main
+
+                // Nếu chưa có ảnh chính → ảnh ở mainIndex là main
+                // Nếu đã có ảnh chính → tất cả ảnh mới là phụ
+                image.setIsMain(!hasMainImage && i == mainIndex);
                 images.add(image);
             }
         } catch (IOException | RuntimeException e) {
