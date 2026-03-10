@@ -244,7 +244,7 @@ public class ProductService implements IProductService {
         return ApiResponse.success(dto, "Cập nhật sản phẩm thành công");
     }
 
-    // Cộng dồn số lượng tồn kho cho biến thể
+    // Cập nhật số lượng tồn kho cho biến thể (cộng dồn hoặc ghi đè)
     @Override
     public ApiResponse<Map<String, Integer>> updateVariantStock(Integer productId, Integer variantId,
             UpdateVariantStockRequest request) {
@@ -259,11 +259,28 @@ public class ProductService implements IProductService {
             return ApiResponse.error("Biến thể không thuộc sản phẩm này");
         }
 
-        // 3. Cộng dồn: stock mới = stock cũ + số lượng nhập thêm
-        int newStock = variant.getStockQuantity() + request.getQuantity();
-        variant.setStockQuantity(newStock);
+        // 3. Xử lý theo mode
+        String mode = request.getMode().trim().toLowerCase();
+        int newStock;
+
+        if ("add".equals(mode)) {
+            // Cộng dồn — quantity phải >= 1
+            if (request.getQuantity() < 1) {
+                return ApiResponse.error("Số lượng nhập thêm phải lớn hơn 0");
+            }
+            newStock = variant.getStockQuantity() + request.getQuantity();
+        } else if ("set".equals(mode)) {
+            // Ghi đè — quantity phải >= 0
+            if (request.getQuantity() < 0) {
+                return ApiResponse.error("Số lượng không được âm");
+            }
+            newStock = request.getQuantity();
+        } else {
+            return ApiResponse.error("Mode không hợp lệ (chỉ chấp nhận 'add' hoặc 'set')");
+        }
 
         // 4. Lưu vào DB
+        variant.setStockQuantity(newStock);
         productVariantRepository.save(variant);
 
         // 5. Trả stockQuantity mới cho FE cập nhật
