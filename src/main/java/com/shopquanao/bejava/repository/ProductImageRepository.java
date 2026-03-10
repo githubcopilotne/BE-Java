@@ -11,4 +11,7 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Inte
 
     // Check product có ảnh chính không
     boolean existsByProductIdAndIsMainTrue(Integer productId);
+
+    // Tìm ảnh chính hiện tại của product
+    ProductImage findByProductIdAndIsMainTrue(Integer productId);
 }

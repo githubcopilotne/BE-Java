@@ -151,4 +151,18 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // PATCH /api/products/{productId}/images/{imageId} — Đổi ảnh chính
+    @PatchMapping("/{productId}/images/{imageId}")
+    public ResponseEntity<ApiResponse<Void>> setMainImage(
+            @PathVariable Integer productId,
+            @PathVariable Integer imageId) {
+        var response = productService.setMainImage(productId, imageId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

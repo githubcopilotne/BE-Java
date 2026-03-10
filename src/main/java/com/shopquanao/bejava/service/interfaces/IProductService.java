@@ -37,4 +37,6 @@ public interface IProductService {
     ApiResponse<Void> deleteVariant(Integer productId, Integer variantId);
 
     ApiResponse<Map<String, Integer>> toggleProductStatus(Integer productId);
+
+    ApiResponse<Void> setMainImage(Integer productId, Integer imageId);
 }

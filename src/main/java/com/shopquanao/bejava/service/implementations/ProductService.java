@@ -363,4 +363,37 @@ public class ProductService implements IProductService {
 
         return ApiResponse.success(Map.of("status", product.getStatus()), "Cập nhật trạng thái thành công");
     }
+
+    // Đổi ảnh chính
+    @Override
+    public ApiResponse<Void> setMainImage(Integer productId, Integer imageId) {
+        // 1. Tìm image theo id
+        ProductImage image = productImageRepository.findById(imageId).orElse(null);
+        if (image == null) {
+            return ApiResponse.error("Ảnh không tồn tại");
+        }
+
+        // 2. Check image thuộc đúng product
+        if (!image.getProductId().equals(productId)) {
+            return ApiResponse.error("Ảnh không thuộc sản phẩm này");
+        }
+
+        // 3. Check image đã là ảnh chính chưa
+        if (image.getIsMain()) {
+            return ApiResponse.error("Ảnh này đã là ảnh chính");
+        }
+
+        // 4. Bỏ isMain ảnh cũ
+        ProductImage currentMain = productImageRepository.findByProductIdAndIsMainTrue(productId);
+        if (currentMain != null) {
+            currentMain.setIsMain(false);
+            productImageRepository.save(currentMain);
+        }
+
+        // 5. Set isMain ảnh mới
+        image.setIsMain(true);
+        productImageRepository.save(image);
+
+        return ApiResponse.success(null, "Đổi ảnh chính thành công");
+    }
 }
