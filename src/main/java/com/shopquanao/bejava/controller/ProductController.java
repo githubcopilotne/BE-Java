@@ -22,10 +22,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map;
 
-// Controller xử lý API sản phẩm (chỉ Admin)
+// Controller xử lý API sản phẩm
 @RestController
 @RequestMapping("/api/products")
-@PreAuthorize("hasRole('Admin')")
 public class ProductController {
 
     private final IProductService productService;
@@ -35,6 +34,7 @@ public class ProductController {
     }
 
     // GET /api/products?page=0&size=10 — Lấy danh sách sản phẩm có phân trang
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductListProjection>>> getAllProducts(Pageable pageable) {
         var response = productService.getAllProducts(pageable);
@@ -42,6 +42,7 @@ public class ProductController {
     }
 
     // POST /api/products — Tạo mới sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping
     public ResponseEntity<ApiResponse<Product>> createProduct(
             @Valid @RequestBody CreateProductRequest request) {
@@ -55,6 +56,7 @@ public class ProductController {
     }
 
     // POST /api/products/{id}/variants — Thêm biến thể cho sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping("/{id}/variants")
     public ResponseEntity<ApiResponse<List<ProductVariant>>> addVariants(
             @PathVariable Integer id,
@@ -69,6 +71,7 @@ public class ProductController {
     }
 
     // POST /api/products/{id}/images — Upload ảnh cho sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping("/{id}/images")
     public ResponseEntity<ApiResponse<List<ProductImage>>> addImages(
             @PathVariable Integer id,
@@ -84,6 +87,7 @@ public class ProductController {
     }
 
     // GET /api/products/{id} — Xem chi tiết sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Integer id) {
         var response = productService.getProductById(id);
@@ -96,6 +100,7 @@ public class ProductController {
     }
 
     // PUT /api/products/{id} — Cập nhật thông tin chung sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<UpdateProductResponse>> updateProduct(
             @PathVariable Integer id,
@@ -109,8 +114,8 @@ public class ProductController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // PATCH /api/products/{productId}/variants/{variantId}/stock — Cộng dồn số
-    // lượng tồn kho
+    // PATCH /api/products/{productId}/variants/{variantId} — Cập nhật tồn kho
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PatchMapping("/{productId}/variants/{variantId}")
     public ResponseEntity<ApiResponse<Map<String, Integer>>> updateVariantStock(
             @PathVariable Integer productId,
@@ -125,7 +130,9 @@ public class ProductController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // DELETE /api/products/{productId}/variants/{variantId} — Xoá biến thể
+    // DELETE /api/products/{productId}/variants/{variantId} — Xoá biến thể (Admin
+    // only)
+    @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{productId}/variants/{variantId}")
     public ResponseEntity<ApiResponse<Void>> deleteVariant(
             @PathVariable Integer productId,
@@ -139,7 +146,8 @@ public class ProductController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // PATCH /api/products/{id}/status — Toggle ẩn/hiện sản phẩm
+    // PATCH /api/products/{id}/status — Toggle ẩn/hiện sản phẩm (Admin only)
+    @PreAuthorize("hasRole('Admin')")
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<Map<String, Integer>>> toggleProductStatus(
             @PathVariable Integer id) {
@@ -153,6 +161,7 @@ public class ProductController {
     }
 
     // PATCH /api/products/{productId}/images/{imageId} — Đổi ảnh chính
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PatchMapping("/{productId}/images/{imageId}")
     public ResponseEntity<ApiResponse<Void>> setMainImage(
             @PathVariable Integer productId,
@@ -166,7 +175,8 @@ public class ProductController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // DELETE /api/products/{productId}/images/{imageId} — Xoá ảnh
+    // DELETE /api/products/{productId}/images/{imageId} — Xoá ảnh (Admin only)
+    @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{productId}/images/{imageId}")
     public ResponseEntity<ApiResponse<Void>> deleteImage(
             @PathVariable Integer productId,
@@ -180,7 +190,8 @@ public class ProductController {
         return ResponseEntity.badRequest().body(response);
     }
 
-    // DELETE /api/products/{id} — Xoá sản phẩm
+    // DELETE /api/products/{id} — Xoá sản phẩm (Admin only)
+    @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(
             @PathVariable Integer id) {
