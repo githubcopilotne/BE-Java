@@ -4,6 +4,8 @@ import com.shopquanao.bejava.entity.ProductImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 // Repository truy vấn bảng Product_Images
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
@@ -14,4 +16,7 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Inte
 
     // Tìm ảnh chính hiện tại của product
     ProductImage findByProductIdAndIsMainTrue(Integer productId);
+
+    // Lấy tất cả ảnh của product (dùng khi xoá product)
+    List<ProductImage> findByProductId(Integer productId);
 }

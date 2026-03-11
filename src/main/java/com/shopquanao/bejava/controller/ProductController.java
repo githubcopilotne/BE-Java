@@ -179,4 +179,17 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // DELETE /api/products/{id} — Xoá sản phẩm
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable Integer id) {
+        var response = productService.deleteProduct(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

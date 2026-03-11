@@ -17,12 +17,14 @@ import com.shopquanao.bejava.repository.OrderItemRepository;
 import com.shopquanao.bejava.repository.ProductImageRepository;
 import com.shopquanao.bejava.repository.ProductRepository;
 import com.shopquanao.bejava.repository.ProductVariantRepository;
+import com.shopquanao.bejava.repository.WishlistRepository;
 import com.shopquanao.bejava.service.interfaces.ICloudinaryService;
 import com.shopquanao.bejava.service.interfaces.IProductService;
 import com.shopquanao.bejava.util.SlugUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -40,6 +42,7 @@ public class ProductService implements IProductService {
     private final ICloudinaryService cloudinaryService;
     private final CartItemRepository cartItemRepository;
     private final OrderItemRepository orderItemRepository;
+    private final WishlistRepository wishlistRepository;
 
     public ProductService(ProductRepository productRepository,
             CategoryRepository categoryRepository,
@@ -47,7 +50,8 @@ public class ProductService implements IProductService {
             ProductImageRepository productImageRepository,
             ICloudinaryService cloudinaryService,
             CartItemRepository cartItemRepository,
-            OrderItemRepository orderItemRepository) {
+            OrderItemRepository orderItemRepository,
+            WishlistRepository wishlistRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productVariantRepository = productVariantRepository;
@@ -55,6 +59,7 @@ public class ProductService implements IProductService {
         this.cloudinaryService = cloudinaryService;
         this.cartItemRepository = cartItemRepository;
         this.orderItemRepository = orderItemRepository;
+        this.wishlistRepository = wishlistRepository;
     }
 
     // Lấy danh sách sản phẩm có phân trang
@@ -435,5 +440,54 @@ public class ProductService implements IProductService {
         productImageRepository.deleteById(imageId);
 
         return ApiResponse.success(null, "Xoá ảnh thành công");
+    }
+
+    // Xoá sản phẩm (cascade xoá tất cả FK references)
+    @Override
+    @Transactional
+    public ApiResponse<Void> deleteProduct(Integer productId) {
+        // 1. Tìm product
+        Product product = productRepository.findById(productId).orElse(null);
+        if (product == null) {
+            return ApiResponse.error("Sản phẩm không tồn tại");
+        }
+
+        // 2. Lấy danh sách variant IDs
+        List<Integer> variantIds = productVariantRepository.findByProductId(productId)
+                .stream()
+                .map(ProductVariant::getVariantId)
+                .toList();
+
+        // 3. Check Order_Items — có đơn hàng → không cho xoá
+        if (!variantIds.isEmpty() && orderItemRepository.existsByVariantIdIn(variantIds)) {
+            return ApiResponse.error("Không thể xoá sản phẩm đã có đơn hàng");
+        }
+
+        // 4. Xoá Cart_Items (qua variants)
+        if (!variantIds.isEmpty()) {
+            cartItemRepository.deleteByVariantIdIn(variantIds);
+        }
+
+        // 5. Xoá Wishlists
+        wishlistRepository.deleteByProductId(productId);
+
+        // 6. Xoá Product_Images (Cloudinary + DB)
+        List<ProductImage> images = productImageRepository.findByProductId(productId);
+        for (ProductImage image : images) {
+            try {
+                cloudinaryService.delete(image.getImageUrl());
+            } catch (IOException e) {
+                // Log lỗi nhưng vẫn tiếp tục xoá
+            }
+        }
+        productImageRepository.deleteAll(images);
+
+        // 7. Xoá Product_Variants
+        productVariantRepository.deleteAllById(variantIds);
+
+        // 8. Xoá Product
+        productRepository.deleteById(productId);
+
+        return ApiResponse.success(null, "Xoá sản phẩm thành công");
     }
 }

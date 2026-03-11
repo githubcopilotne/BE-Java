@@ -41,4 +41,6 @@ public interface IProductService {
     ApiResponse<Void> setMainImage(Integer productId, Integer imageId);
 
     ApiResponse<Void> deleteImage(Integer productId, Integer imageId);
+
+    ApiResponse<Void> deleteProduct(Integer productId);
 }
