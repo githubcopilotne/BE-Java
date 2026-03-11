@@ -38,4 +38,27 @@ public class CloudinaryService implements ICloudinaryService {
         // Cloudinary trả về nhiều thông tin, chỉ lấy URL
         return result.get("secure_url").toString();
     }
+
+    // Xoá ảnh trên Cloudinary theo URL
+    @Override
+    public void delete(String imageUrl) throws IOException {
+        // Trích xuất public_id từ URL
+        // URL dạng: https://res.cloudinary.com/.../upload/v123/products/abc123.jpg
+        // public_id = "products/abc123"
+        String publicId = extractPublicId(imageUrl);
+        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+    }
+
+    // Trích xuất public_id từ Cloudinary URL
+    private String extractPublicId(String imageUrl) {
+        // Tìm vị trí "/upload/" → lấy phần sau đó → bỏ version (v123/) → bỏ extension
+        // (.jpg)
+        String afterUpload = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
+        // Bỏ version: "v123/products/abc123.jpg" → "products/abc123.jpg"
+        if (afterUpload.startsWith("v")) {
+            afterUpload = afterUpload.substring(afterUpload.indexOf("/") + 1);
+        }
+        // Bỏ extension: "products/abc123.jpg" → "products/abc123"
+        return afterUpload.substring(0, afterUpload.lastIndexOf("."));
+    }
 }

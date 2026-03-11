@@ -165,4 +165,18 @@ public class ProductController {
 
         return ResponseEntity.badRequest().body(response);
     }
+
+    // DELETE /api/products/{productId}/images/{imageId} — Xoá ảnh
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ResponseEntity<ApiResponse<Void>> deleteImage(
+            @PathVariable Integer productId,
+            @PathVariable Integer imageId) {
+        var response = productService.deleteImage(productId, imageId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
 }

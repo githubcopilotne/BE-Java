@@ -9,4 +9,7 @@ public interface ICloudinaryService {
 
     // Upload 1 file ảnh, trả về URL
     String upload(MultipartFile file) throws IOException;
+
+    // Xoá ảnh trên Cloudinary theo URL
+    void delete(String imageUrl) throws IOException;
 }

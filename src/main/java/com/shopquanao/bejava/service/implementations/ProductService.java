@@ -404,4 +404,36 @@ public class ProductService implements IProductService {
 
         return ApiResponse.success(null, "Đổi ảnh chính thành công");
     }
+
+    // Xoá ảnh sản phẩm (Cloudinary + DB)
+    @Override
+    public ApiResponse<Void> deleteImage(Integer productId, Integer imageId) {
+        // 1. Tìm image theo id
+        ProductImage image = productImageRepository.findById(imageId).orElse(null);
+        if (image == null) {
+            return ApiResponse.error("Ảnh không tồn tại");
+        }
+
+        // 2. Check image thuộc đúng product
+        if (!image.getProductId().equals(productId)) {
+            return ApiResponse.error("Ảnh không thuộc sản phẩm này");
+        }
+
+        // 3. Không cho xoá ảnh chính
+        if (image.getIsMain()) {
+            return ApiResponse.error("Không thể xoá ảnh chính. Vui lòng đổi ảnh chính trước");
+        }
+
+        // 4. Xoá file trên Cloudinary
+        try {
+            cloudinaryService.delete(image.getImageUrl());
+        } catch (IOException e) {
+            return ApiResponse.error("Xoá ảnh trên Cloudinary thất bại: " + e.getMessage());
+        }
+
+        // 5. Xoá record trong DB
+        productImageRepository.deleteById(imageId);
+
+        return ApiResponse.success(null, "Xoá ảnh thành công");
+    }
 }
