@@ -4,6 +4,7 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.VoucherListProjection;
 import com.shopquanao.bejava.dto.request.CreateVoucherRequest;
 import com.shopquanao.bejava.dto.request.UpdateVoucherRequest;
+import com.shopquanao.bejava.dto.response.VoucherStatsResponse;
 import com.shopquanao.bejava.entity.Voucher;
 import com.shopquanao.bejava.service.interfaces.IVoucherService;
 import jakarta.validation.Valid;
@@ -74,5 +75,11 @@ public class VoucherController {
             return ResponseEntity.ok(response);
         }
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<VoucherStatsResponse>> getStats() {
+        var response = voucherService.getStats();
+        return ResponseEntity.ok(response);
     }
 }

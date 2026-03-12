@@ -4,6 +4,7 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.VoucherListProjection;
 import com.shopquanao.bejava.dto.request.CreateVoucherRequest;
 import com.shopquanao.bejava.dto.request.UpdateVoucherRequest;
+import com.shopquanao.bejava.dto.response.VoucherStatsResponse;
 import com.shopquanao.bejava.entity.Voucher;
 import com.shopquanao.bejava.repository.VoucherRepository;
 import com.shopquanao.bejava.service.interfaces.IVoucherService;
@@ -194,5 +195,19 @@ public class VoucherService implements IVoucherService {
 
         voucherRepository.delete(voucher);
         return ApiResponse.success(voucher, "Xóa voucher thành công");
+    }
+
+    @Override
+    public ApiResponse<VoucherStatsResponse> getStats() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime end = now.plusDays(7);
+
+        var stats = new VoucherStatsResponse(
+                voucherRepository.count(),
+                voucherRepository.countActive(now),
+                voucherRepository.countNearExpiry(now, end),
+                voucherRepository.countExpired(now));
+
+        return ApiResponse.success(stats, "Lấy thống kê voucher thành công");
     }
 }

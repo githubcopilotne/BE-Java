@@ -4,6 +4,7 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.VoucherListProjection;
 import com.shopquanao.bejava.dto.request.CreateVoucherRequest;
 import com.shopquanao.bejava.dto.request.UpdateVoucherRequest;
+import com.shopquanao.bejava.dto.response.VoucherStatsResponse;
 import com.shopquanao.bejava.entity.Voucher;
 
 import java.util.List;
@@ -19,5 +20,7 @@ public interface IVoucherService {
     ApiResponse<Voucher> updateVoucher(Integer id, UpdateVoucherRequest request);
 
     ApiResponse<Voucher> deleteVoucher(Integer id);
+
+    ApiResponse<VoucherStatsResponse> getStats();
 
 }
