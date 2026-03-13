@@ -1,6 +1,7 @@
 package com.shopquanao.bejava.service.implementations;
 
 import com.shopquanao.bejava.dto.ApiResponse;
+import com.shopquanao.bejava.dto.projection.CustomerDetailProjection;
 import com.shopquanao.bejava.dto.projection.CustomerListProjection;
 import com.shopquanao.bejava.repository.UserRepository;
 import com.shopquanao.bejava.service.interfaces.ICustomerService;
@@ -34,5 +35,16 @@ public class CustomerService implements ICustomerService {
 
         Page<CustomerListProjection> customers = userRepository.getCustomers(trimmedKeyword, status, pageable);
         return ApiResponse.success(customers, "Lấy danh sách khách hàng thành công");
+    }
+
+    @Override
+    public ApiResponse<CustomerDetailProjection> getCustomerById(Integer id) {
+        var result = userRepository.getCustomerById(id);
+
+        if (result.isEmpty()) {
+            return ApiResponse.error("Khách hàng không tồn tại");
+        }
+
+        return ApiResponse.success(result.get(), "Lấy chi tiết khách hàng thành công");
     }
 }
