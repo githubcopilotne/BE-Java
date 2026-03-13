@@ -86,13 +86,19 @@ public class CategoryService implements ICategoryService {
             return ApiResponse.error("Trạng thái không hợp lệ");
         }
 
-        // 5. Cập nhật giá trị
+        // 5. Nếu category chuyển từ hiện (1) → ẩn (0) → ẩn tất cả product thuộc
+        // category
+        if (category.getStatus() == 1 && request.getStatus() == 0) {
+            productRepository.updateStatusByCategoryId(id, 0);
+        }
+
+        // 6. Cập nhật giá trị
         category.setCategoryName(categoryName);
         category.setSlug(SlugUtils.toSlug(categoryName)); // Sinh lại slug nếu đổi tên
         category.setDescription(description);
         category.setStatus(request.getStatus());
 
-        // 6. Lưu vào DB (updatedAt tự set bởi @PreUpdate)
+        // 7. Lưu vào DB (updatedAt tự set bởi @PreUpdate)
         Category saved = categoryRepository.save(category);
 
         return ApiResponse.success(saved, "Cập nhật danh mục thành công");

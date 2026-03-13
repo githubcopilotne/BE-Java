@@ -4,6 +4,9 @@ import com.shopquanao.bejava.dto.ApiResponse;
 import com.shopquanao.bejava.dto.projection.ProductListProjection;
 import com.shopquanao.bejava.dto.request.CreateProductRequest;
 import com.shopquanao.bejava.dto.request.CreateVariantRequest;
+import com.shopquanao.bejava.dto.request.UpdateProductRequest;
+import com.shopquanao.bejava.dto.request.UpdateVariantStockRequest;
+import com.shopquanao.bejava.dto.response.UpdateProductResponse;
 import com.shopquanao.bejava.entity.Product;
 import com.shopquanao.bejava.entity.ProductImage;
 import com.shopquanao.bejava.entity.ProductVariant;
@@ -17,11 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
-// Controller xử lý API sản phẩm (chỉ Admin)
+// Controller xử lý API sản phẩm
 @RestController
 @RequestMapping("/api/products")
-@PreAuthorize("hasRole('Admin')")
 public class ProductController {
 
     private final IProductService productService;
@@ -31,6 +34,7 @@ public class ProductController {
     }
 
     // GET /api/products?page=0&size=10 — Lấy danh sách sản phẩm có phân trang
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<ProductListProjection>>> getAllProducts(Pageable pageable) {
         var response = productService.getAllProducts(pageable);
@@ -38,6 +42,7 @@ public class ProductController {
     }
 
     // POST /api/products — Tạo mới sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping
     public ResponseEntity<ApiResponse<Product>> createProduct(
             @Valid @RequestBody CreateProductRequest request) {
@@ -51,6 +56,7 @@ public class ProductController {
     }
 
     // POST /api/products/{id}/variants — Thêm biến thể cho sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping("/{id}/variants")
     public ResponseEntity<ApiResponse<List<ProductVariant>>> addVariants(
             @PathVariable Integer id,
@@ -65,6 +71,7 @@ public class ProductController {
     }
 
     // POST /api/products/{id}/images — Upload ảnh cho sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @PostMapping("/{id}/images")
     public ResponseEntity<ApiResponse<List<ProductImage>>> addImages(
             @PathVariable Integer id,
@@ -80,9 +87,115 @@ public class ProductController {
     }
 
     // GET /api/products/{id} — Xem chi tiết sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<Product>> getProductById(@PathVariable Integer id) {
         var response = productService.getProductById(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PUT /api/products/{id} — Cập nhật thông tin chung sản phẩm
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<UpdateProductResponse>> updateProduct(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateProductRequest request) {
+        var response = productService.updateProduct(id, request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PATCH /api/products/{productId}/variants/{variantId} — Cập nhật tồn kho
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
+    @PatchMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> updateVariantStock(
+            @PathVariable Integer productId,
+            @PathVariable Integer variantId,
+            @Valid @RequestBody UpdateVariantStockRequest request) {
+        var response = productService.updateVariantStock(productId, variantId, request);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // DELETE /api/products/{productId}/variants/{variantId} — Xoá biến thể (Admin
+    // only)
+    @PreAuthorize("hasRole('Admin')")
+    @DeleteMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<ApiResponse<Void>> deleteVariant(
+            @PathVariable Integer productId,
+            @PathVariable Integer variantId) {
+        var response = productService.deleteVariant(productId, variantId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PATCH /api/products/{id}/status — Toggle ẩn/hiện sản phẩm (Admin only)
+    @PreAuthorize("hasRole('Admin')")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> toggleProductStatus(
+            @PathVariable Integer id) {
+        var response = productService.toggleProductStatus(id);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // PATCH /api/products/{productId}/images/{imageId} — Đổi ảnh chính
+    @PreAuthorize("hasAnyRole('Admin', 'Staff')")
+    @PatchMapping("/{productId}/images/{imageId}")
+    public ResponseEntity<ApiResponse<Void>> setMainImage(
+            @PathVariable Integer productId,
+            @PathVariable Integer imageId) {
+        var response = productService.setMainImage(productId, imageId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // DELETE /api/products/{productId}/images/{imageId} — Xoá ảnh (Admin only)
+    @PreAuthorize("hasRole('Admin')")
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ResponseEntity<ApiResponse<Void>> deleteImage(
+            @PathVariable Integer productId,
+            @PathVariable Integer imageId) {
+        var response = productService.deleteImage(productId, imageId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // DELETE /api/products/{id} — Xoá sản phẩm (Admin only)
+    @PreAuthorize("hasRole('Admin')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable Integer id) {
+        var response = productService.deleteProduct(id);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

@@ -5,8 +5,10 @@ import com.shopquanao.bejava.entity.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 // Repository truy vấn bảng Products
 @Repository
@@ -35,4 +37,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     // Kiểm tra tên sản phẩm đã tồn tại chưa (SQL Server mặc định case-insensitive)
     boolean existsByProductName(String productName);
+
+    // Kiểm tra tên sản phẩm đã tồn tại chưa — loại trừ chính sản phẩm đang sửa
+    boolean existsByProductNameAndProductIdNot(String productName, Integer productId);
+
+    // Ẩn tất cả product thuộc category khi category bị ẩn
+    @Modifying
+    @Transactional
+    @Query("UPDATE Product p SET p.status = :status WHERE p.categoryId = :categoryId")
+    void updateStatusByCategoryId(Integer categoryId, Integer status);
 }
