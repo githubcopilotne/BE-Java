@@ -1,0 +1,38 @@
+package com.shopquanao.bejava.service.implementations;
+
+import com.shopquanao.bejava.dto.ApiResponse;
+import com.shopquanao.bejava.dto.projection.CustomerListProjection;
+import com.shopquanao.bejava.repository.UserRepository;
+import com.shopquanao.bejava.service.interfaces.ICustomerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+@Service
+public class CustomerService implements ICustomerService {
+
+    private final UserRepository userRepository;
+
+    public CustomerService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Override
+    public ApiResponse<Page<CustomerListProjection>> getCustomers(String keyword, Integer status, int page, int size) {
+        // Trim keyword, nếu rỗng thì set null để query bỏ qua điều kiện tìm kiếm
+        String trimmedKeyword = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+
+        // Validate status: chỉ chấp nhận null, 0, 1
+        if (status != null && status != 0 && status != 1) {
+            return ApiResponse.error("Trạng thái không hợp lệ (chỉ chấp nhận 0 hoặc 1)");
+        }
+
+        // Sắp xếp theo ngày tham gia mới nhất
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<CustomerListProjection> customers = userRepository.getCustomers(trimmedKeyword, status, pageable);
+        return ApiResponse.success(customers, "Lấy danh sách khách hàng thành công");
+    }
+}
