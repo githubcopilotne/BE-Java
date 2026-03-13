@@ -5,10 +5,14 @@ import com.shopquanao.bejava.dto.projection.CustomerDetailProjection;
 import com.shopquanao.bejava.dto.projection.CustomerListProjection;
 import org.springframework.data.domain.Page;
 
+import java.util.Map;
+
 public interface ICustomerService {
 
     ApiResponse<Page<CustomerListProjection>> getCustomers(String keyword, Integer status, int page, int size);
 
     ApiResponse<CustomerDetailProjection> getCustomerById(Integer id);
+
+    ApiResponse<Map<String, Integer>> toggleCustomerStatus(Integer id);
 
 }

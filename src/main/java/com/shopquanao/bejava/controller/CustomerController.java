@@ -8,10 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -40,6 +43,17 @@ public class CustomerController {
     @PreAuthorize("hasAnyRole('Admin', 'Staff')")
     public ResponseEntity<ApiResponse<CustomerDetailProjection>> getCustomerById(@PathVariable Integer id) {
         var response = customerService.getCustomerById(id);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    // Chỉ Admin được khóa/mở khóa tài khoản khách hàng
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> toggleCustomerStatus(@PathVariable Integer id) {
+        var response = customerService.toggleCustomerStatus(id);
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         }
