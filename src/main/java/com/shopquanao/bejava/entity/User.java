@@ -56,6 +56,9 @@ public class User {
     @Column(name = "address", length = 500)
     private String address;
 
+    @Column(name = "employee_code", length = 20)
+    private String employeeCode;
+
     @Column(name = "id_card", length = 20)
     private String idCard;
 
